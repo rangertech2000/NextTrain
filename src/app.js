@@ -1,6 +1,24 @@
 var station1, station2; 
 var requests;
 
+/*
+var appKeyBase = 1;
+var appKeys = {
+	'KEY_STATION1' : 1,
+	'KEY_STATION2' : 2,
+	'KEY_STATION3' : 3,	
+	'KEY_DEPART_TIME' : 4,
+	'KEY_DELAY' : 5,
+	'KEY_ARRIVE_TIME' : 6,
+	'KEY_RECORDS_TO_FETCH' : 7,
+	'KEY_SCHEDULE' : 8	
+  };
+
+var getAppKey = function(keyName) {
+    return appKeyBase + appKeys[keyName];
+  };
+*/
+
 var xhrRequest = function (url, type, callback) {
 	var xhr = new XMLHttpRequest();
 	xhr.onload = function () {
@@ -29,9 +47,9 @@ console.log(URL);
       		if (json.length === 0){
         		// Assemble dictionary using our keys
         		dictionary = {
-					"KEY_DEPART_TIME": 'No trains',
-				  	"KEY_DELAY": '999',
-				  	"KEY_ARRIVE_TIME": 'No trains'
+					'KEY_DEPART_TIME': 'No trains',
+				  	'KEY_DELAY': '999',
+				  	'KEY_ARRIVE_TIME': 'No trains'
         		};
       		} 
 			else if (requests == 1){
@@ -47,9 +65,10 @@ console.log(URL);
 				else {arrival_time = json[0].term_arival_time;}
 				
 				dictionary = {
-					"KEY_DEPART_TIME": json[0].orig_departure_time,
-					"KEY_DELAY": delayMins,
-					"KEY_ARRIVE_TIME": json[0].orig_arrival_time
+					'KEY_TRAIN_LINE': (json[0].orig_line).replace('\/','/'),
+					'KEY_DEPART_TIME': json[0].orig_departure_time,
+					'KEY_DELAY': delayMins,
+					'KEY_ARRIVE_TIME': json[0].orig_arrival_time
 				};
 			}
 			else {

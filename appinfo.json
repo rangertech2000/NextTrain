@@ -1,19 +1,21 @@
 {
     "appKeys": {
-        "KEY_ARRIVE_TIME": 5,
-        "KEY_DELAY": 4,
-        "KEY_DEPART_TIME": 3,
-        "KEY_RECORDS_TO_FETCH": 6,
-        "KEY_SCHEDULE": 7,
+        "KEY_ARRIVE_TIME": 6,
+        "KEY_DELAY": 5,
+        "KEY_DEPART_TIME": 4,
+        "KEY_RECORDS_TO_FETCH": 7,
+        "KEY_SCHEDULE": 9,
         "KEY_STATION1": 1,
-        "KEY_STATION2": 2
+        "KEY_STATION2": 2,
+        "KEY_STATION3": 3,
+        "KEY_TRAIN_LINE": 8
     },
     "capabilities": [
         "configurable"
     ],
     "companyName": "thaoh@hotmail.com",
     "enableMultiJS": false,
-    "longName": "NextToArrive_C",
+    "longName": "Next Train",
     "projectType": "native",
     "resources": {
         "media": [
@@ -42,26 +44,28 @@
                 "type": "bitmap"
             },
             {
+                "characterRegex": "[0-9:m ]",
                 "file": "fonts/white-rabbit.ttf",
-                "name": "FONT_WHITE_RABBIT_48",
+                "name": "FONT_WHITE_RABBIT_60",
                 "targetPlatforms": null,
                 "type": "font"
             },
             {
+                "characterRegex": "[0-9: ]",
                 "file": "fonts/white-rabbit.ttf",
-                "name": "FONT_WHITE_RABBIT_60",
+                "name": "FONT_WHITE_RABBIT_48",
                 "targetPlatforms": null,
                 "type": "font"
             }
         ]
     },
     "sdkVersion": "3",
-    "shortName": "NextToArrive_C",
+    "shortName": "Next Train",
     "targetPlatforms": [
         "aplite",
         "basalt"
     ],
-    "uuid": "64ca784a-6b4c-457f-9f7d-62d7f5e42e42",
+    "uuid": "70456afd-d5cd-49c7-8286-ff0fa89eedb1",
     "versionLabel": "1.0",
     "watchapp": {
         "watchface": false
