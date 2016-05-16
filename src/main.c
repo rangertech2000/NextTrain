@@ -1,4 +1,4 @@
-//v2.1.
+//v2.2.
 #include <pebble.h>
 
 typedef enum {
@@ -43,17 +43,19 @@ static BitmapLayer *s_septa_logo_layer;
 
 // Train info window
 static Window *s_trainInfo_window;
-//static StatusBarLayer *s_statusbar_layer;
-static TextLayer *s_train_line_layer;
+static Layer *s_train_countdown_canvas_layer;
+static Layer *s_train_time_canvas_layer;
 static BitmapLayer *s_train_bar_layer;
-static BitmapLayer *s_train_nav_layer;
+static TextLayer *s_train_line_layer;
+static TextLayer *s_train_station1_layer;
 static TextLayer *s_train_departTime_layer;
 static TextLayer *s_train_time_layer;
-static TextLayer *s_train_arriveTime_layer;
-static TextLayer *s_train_station1_layer;
-static TextLayer *s_train_station2_layer;
 static TextLayer *s_train_countdown_layer;
 static TextLayer *s_train_countdown_label_layer;
+static TextLayer *s_train_arriveTime_layer;
+static TextLayer *s_train_station2_layer;
+static BitmapLayer *s_train_nav_schedule_layer;
+static BitmapLayer *s_train_nav_connect_layer;
 
 // Train schedule window
 static Window *s_trainSchedule_window;
@@ -178,7 +180,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 		static char arrive_layer_buffer[12];
 		snprintf(arrive_layer_buffer, sizeof(arrive_layer_buffer), "%s", 
 			arrive_tuple->value->cstring);
-				 
+			 
 		// Set background color
 		GColor bgColor;
         
@@ -191,6 +193,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 		else if (i_delay > 14) {
             bgColor = GColorRed;
 		}
+	
+		//graphics_context_set_fill_color(ctx, bgColor);
 		
 		// Update the text
 		//window_set_background_color(s_trainInfo_window, bgColor);
@@ -406,23 +410,42 @@ static void main_window_unload(Window *window) {
 	fonts_unload_custom_font(s_time_font_48);
 }
 
+static void update_proc_train_countdown(Layer *layer, GContext *ctx) {
+	//GRect bounds = layer_get_bounds(layer);
+	GRect bounds = GRect(19, 36, 104, 94);
+
+	//graphics_context_set_fill_color(ctx, GColorBlue);
+	graphics_context_set_stroke_width(ctx, 2);
+	graphics_context_set_stroke_color(ctx, GColorRed);
+	graphics_draw_round_rect(ctx, bounds, 4);
+}
+
+static void update_proc_train_time(Layer *layer, GContext *ctx) {
+	GRect bounds = GRect(88, 59, 60, 33);
+	//graphics_context_set_stroke_color(ctx, GColorWhite);
+	graphics_context_set_fill_color(ctx, GColorRed);
+	graphics_fill_rect(ctx, bounds, 4, GCornersLeft);
+}
+
 static void trainInfo_window_load(Window *trainInfo_window) {
 	// Get information about the Window
 	Layer *window_layer = window_get_root_layer(trainInfo_window);
 	GRect bounds = layer_get_bounds(window_layer);
 	window_set_background_color(trainInfo_window, GColorBlack);
-/*
-	// Create status bar layer
-	s_statusbar_layer = status_bar_layer_create();
-	//int16_t width = layer_get_bounds(window_layer).size.w - ACTION_BAR_WIDTH;
-	int16_t width = layer_get_bounds(window_layer).size.w;
-	GRect frame = GRect(0, 0, width, STATUS_BAR_LAYER_HEIGHT);
-	layer_set_frame(status_bar_layer_get_layer(s_statusbar_layer), frame);
-	//layer_add_child(window_layer, status_bar_layer_get_layer(s_statusbar_layer));
-*/
+	
+	// Create countdown canvas layer
+	s_train_countdown_canvas_layer = layer_create(bounds);
+	layer_set_update_proc(s_train_countdown_canvas_layer, update_proc_train_countdown);
+	layer_add_child(window_layer, s_train_countdown_canvas_layer);
+		
+	// Create time canvas layer
+	s_train_time_canvas_layer = layer_create(bounds);
+	layer_set_update_proc(s_train_time_canvas_layer, update_proc_train_time);
+	layer_add_child(window_layer, s_train_time_canvas_layer);
+	
 	// Create train line layer
 	s_train_line_layer = text_layer_create(
-	  GRect(PBL_IF_ROUND_ELSE(30, 0), PBL_IF_ROUND_ELSE(5, 0), (bounds.size.w), 18));
+	  GRect(PBL_IF_ROUND_ELSE(30, 0), PBL_IF_ROUND_ELSE(5, -4), (bounds.size.w), 18));
 	text_layer_set_background_color(s_train_line_layer, GColorClear);
 	text_layer_set_font(s_train_line_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
 	text_layer_set_text_color(s_train_line_layer, GColorWhite);
@@ -441,7 +464,7 @@ static void trainInfo_window_load(Window *trainInfo_window) {
 
 	// Create depart station layer
 	s_train_station1_layer = text_layer_create(
-	  GRect(PBL_IF_ROUND_ELSE(30, 0), PBL_IF_ROUND_ELSE(21, 16), (bounds.size.w), 18));
+	  GRect(PBL_IF_ROUND_ELSE(30, 0), PBL_IF_ROUND_ELSE(21, 12), (bounds.size.w), 18));
 	text_layer_set_background_color(s_train_station1_layer, GColorClear);
 	text_layer_set_font(s_train_station1_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 	text_layer_set_text_color(s_train_station1_layer, GColorWhite);
@@ -461,8 +484,8 @@ static void trainInfo_window_load(Window *trainInfo_window) {
 	text_layer_set_text(s_train_departTime_layer, "Loading...");
 	layer_add_child(window_get_root_layer(trainInfo_window), text_layer_get_layer(s_train_departTime_layer));
 	
-	// Create the time layer
-	s_train_time_layer = text_layer_create(GRect(90, PBL_IF_ROUND_ELSE(69, 60), 54, 28));
+	// Create the time text layer
+	s_train_time_layer = text_layer_create(GRect(90, PBL_IF_ROUND_ELSE(69, 61), 54, 28));
 	text_layer_set_background_color(s_train_time_layer, GColorClear);
 	text_layer_set_text_alignment(s_train_time_layer, GTextAlignmentRight);
 	text_layer_set_text_color(s_train_time_layer, GColorWhite);
@@ -472,7 +495,7 @@ static void trainInfo_window_load(Window *trainInfo_window) {
 	
 	// Create countdown label layer
 	s_train_countdown_label_layer = text_layer_create(
-	GRect(PBL_IF_ROUND_ELSE(49, 22), 64, (bounds.size.w - 19), 16));
+	GRect(PBL_IF_ROUND_ELSE(49, 22), 65, (bounds.size.w - 19), 16));
 	text_layer_set_background_color(s_train_countdown_label_layer, GColorClear);
 	text_layer_set_text_color(s_train_countdown_label_layer, GColorWhite);
 	text_layer_set_text_alignment(s_train_countdown_label_layer, GTextAlignmentLeft);
@@ -484,7 +507,7 @@ static void trainInfo_window_load(Window *trainInfo_window) {
 	s_time_font_60 = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_WHITE_RABBIT_60));  
 	// Create countdown layer
 	s_train_countdown_layer = text_layer_create(
-	GRect(PBL_IF_ROUND_ELSE(49, 19), 64, (bounds.size.w - 19), 60));
+	GRect(PBL_IF_ROUND_ELSE(49, 20), 65, (bounds.size.w - 19), 60));
 	text_layer_set_background_color(s_train_countdown_layer, GColorClear);
 	text_layer_set_text_color(s_train_countdown_layer, GColorWhite);
 	text_layer_set_text_alignment(s_train_countdown_layer, GTextAlignmentLeft);
@@ -495,7 +518,7 @@ static void trainInfo_window_load(Window *trainInfo_window) {
 	
 	// Create arrive time Layer
 	s_train_arriveTime_layer = text_layer_create(
-	  GRect(PBL_IF_ROUND_ELSE(49, 19), 127, (bounds.size.w - 19), 24));
+	  GRect(PBL_IF_ROUND_ELSE(49, 19), 126, (bounds.size.w - 19), 24));
 	text_layer_set_background_color(s_train_arriveTime_layer, GColorClear);
 	text_layer_set_font(s_train_arriveTime_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
 	text_layer_set_text_color(s_train_arriveTime_layer, GColorWhite);
@@ -506,7 +529,7 @@ static void trainInfo_window_load(Window *trainInfo_window) {
   
 	// Create arrive station layer
 	s_train_station2_layer = text_layer_create(
-	  GRect(PBL_IF_ROUND_ELSE(30, 0), 149, (bounds.size.w), 18));
+	  GRect(PBL_IF_ROUND_ELSE(30, 0), 148, (bounds.size.w), 18));
 	text_layer_set_background_color(s_train_station2_layer, GColorClear);
 	text_layer_set_font(s_train_station2_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
 	text_layer_set_text_color(s_train_station2_layer, GColorWhite);
@@ -515,13 +538,21 @@ static void trainInfo_window_load(Window *trainInfo_window) {
 	//text_layer_set_text(s_train_station1_layer, station2);
 	layer_add_child(window_get_root_layer(trainInfo_window), text_layer_get_layer(s_train_station2_layer));
 
-	// Create train navigation layer
-	s_train_nav_layer = bitmap_layer_create(
-	  GRect(PBL_IF_ROUND_ELSE(120, 125), PBL_IF_ROUND_ELSE(5, 0), 20, 168));
-	bitmap_layer_set_bitmap(s_train_nav_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV));
-	//bitmap_layer_set_background_color(s_train_nav_layer, GColorClear);
-	bitmap_layer_set_compositing_mode(s_train_nav_layer, GCompOpSet);
-	layer_add_child(window_get_root_layer(trainInfo_window), bitmap_layer_get_layer(s_train_nav_layer));
+	// Create train navigation schedule layer
+	s_train_nav_schedule_layer = bitmap_layer_create(
+	  GRect(PBL_IF_ROUND_ELSE(121, 126), PBL_IF_ROUND_ELSE(25, 16), 18, 30));
+	bitmap_layer_set_bitmap(s_train_nav_schedule_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV_SCHEDULE));
+	//bitmap_layer_set_background_color(s_train_nav_schedule_layer, GColorClear);
+	bitmap_layer_set_compositing_mode(s_train_nav_schedule_layer, GCompOpSet);
+	layer_add_child(window_get_root_layer(trainInfo_window), bitmap_layer_get_layer(s_train_nav_schedule_layer));
+	
+	// Create train navigation connect layer
+	s_train_nav_connect_layer = bitmap_layer_create(
+	  GRect(PBL_IF_ROUND_ELSE(123, 128), PBL_IF_ROUND_ELSE(119, 124), 18, 42));
+	bitmap_layer_set_bitmap(s_train_nav_connect_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV_CONNECT));
+	//bitmap_layer_set_background_color(s_train_nav_connect_layer, GColorClear);
+	bitmap_layer_set_compositing_mode(s_train_nav_connect_layer, GCompOpSet);
+	layer_add_child(window_get_root_layer(trainInfo_window), bitmap_layer_get_layer(s_train_nav_connect_layer));
 	
 	// Update the TIME
 	update_time();
@@ -536,6 +567,8 @@ static void trainInfo_window_load(Window *trainInfo_window) {
 static void trainInfo_window_unload(Window *trainInfo_window) {
 	// Destroy train window elements
 	//status_bar_layer_destroy(s_statusbar_layer);
+	layer_destroy(s_train_countdown_canvas_layer);
+	layer_destroy(s_train_time_canvas_layer);
 	text_layer_destroy(s_train_line_layer);
 	bitmap_layer_destroy(s_train_bar_layer);
 	text_layer_destroy(s_train_station1_layer);
@@ -546,7 +579,9 @@ static void trainInfo_window_unload(Window *trainInfo_window) {
 	text_layer_destroy(s_train_countdown_layer);
 	text_layer_destroy(s_train_arriveTime_layer);
 	text_layer_destroy(s_train_station2_layer);
-	bitmap_layer_destroy(s_train_nav_layer);
+	//bitmap_layer_destroy(s_train_nav_layer);
+	bitmap_layer_destroy(s_train_nav_schedule_layer);
+	bitmap_layer_destroy(s_train_nav_connect_layer);
 }
 
 static void trainSchedule_window_load(Window *trainSchedule_window) {

@@ -65,7 +65,7 @@ console.log(URL);
 				else {arrival_time = json[0].term_arival_time;}
 				
 				dictionary = {
-					'KEY_TRAIN_LINE': (json[0].orig_line).replace('\/','/'),
+					'KEY_TRAIN_LINE': (json[0].orig_line + ' Line').replace('\/','/'),
 					'KEY_DEPART_TIME': json[0].orig_departure_time,
 					'KEY_DELAY': delayMins,
 					'KEY_ARRIVE_TIME': json[0].orig_arrival_time
