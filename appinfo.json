@@ -1,14 +1,14 @@
 {
     "appKeys": {
-        "KEY_ARRIVE_TIME": 6,
-        "KEY_DELAY": 5,
-        "KEY_DEPART_TIME": 4,
-        "KEY_RECORDS_TO_FETCH": 7,
+        "KEY_ARRIVE_TIME": 7,
+        "KEY_DELAY": 6,
+        "KEY_DEPART_TIME": 5,
+        "KEY_RECORDS": 8,
         "KEY_SCHEDULE": 9,
         "KEY_STATION1": 1,
         "KEY_STATION2": 2,
         "KEY_STATION3": 3,
-        "KEY_TRAIN_LINE": 8
+        "KEY_TRAIN_LINE": 4
     },
     "capabilities": [
         "configurable"
@@ -74,10 +74,9 @@
     "sdkVersion": "3",
     "shortName": "Next Train",
     "targetPlatforms": [
-        "aplite",
         "basalt"
     ],
-    "uuid": "70456afd-d5cd-49c7-8286-ff0fa89eedb1",
+    "uuid": "f7ead309-34af-45ff-bee2-35fd286044fa",
     "versionLabel": "1.0",
     "watchapp": {
         "watchface": false

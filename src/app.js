@@ -1,5 +1,9 @@
 var station1, station2; 
-var requests;
+var records;
+//var request_type;
+// request_type = 1 : train 1 info
+// request_type = 2 : train 2 info
+// request_type = 3 : schedule info
 
 /*
 var appKeyBase = 1;
@@ -32,10 +36,10 @@ function getTrainInfo() {
 	// Construct URL
 	station1 = station1.replace(' ', '%20');
 	station2 = station2.replace(' ', '%20');
-  	var URL = 'http://www3.septa.org/hackathon/NextToArrive/' + station1 + '/' + station2 + '/' + requests;
+  	var URL = 'http://www3.septa.org/hackathon/NextToArrive/' + station1 + '/' + station2 + '/' + records;
   	URL = URL.replace(/\s/g, '%20');
-	//URL = encodeURIComponent(URL);
 console.log(URL);
+	
 	// Send request to SEPTA
   	xhrRequest(URL, 'GET',
     	function(responseText) {
@@ -52,35 +56,44 @@ console.log(URL);
 				  	'KEY_ARRIVE_TIME': 'No trains'
         		};
       		} 
-			else if (requests == 1){
+			else if (records == 1){
 				// Get the delay minutes
 				var delay = json[0].orig_delay;
 				var delayMins = delay.substr(0, delay.indexOf(' '));
 				if (delayMins == 'On'){delayMins = '0';}
 				else if (delayMins < 0){delayMins = '999';}
 				
-				// Get the arrival time
-				var arrival_time;
-				if (json[0].isdirect == 'true') {arrival_time = json[0].orig_arrival_time;}
-				else {arrival_time = json[0].term_arival_time;}
-				
-				dictionary = {
-					'KEY_TRAIN_LINE': (json[0].orig_line + ' Line').replace('\/','/'),
-					'KEY_DEPART_TIME': json[0].orig_departure_time,
-					'KEY_DELAY': delayMins,
-					'KEY_ARRIVE_TIME': json[0].orig_arrival_time
-				};
+				// GCheck for a connection
+				//var arrival_time;
+				if (json[0].isdirect == 'true') {
+					//arrival_time = json[0].orig_arrival_time;
+					dictionary = {
+						'KEY_TRAIN_LINE': (json[0].orig_line + ' Line').replace('\/','/'),
+						'KEY_DEPART_TIME': json[0].orig_departure_time,
+						'KEY_DELAY': delayMins,
+						'KEY_ARRIVE_TIME': json[0].orig_arrival_time
+					};
+				}
+				else {	// There is a connection
+					dictionary = {
+						'KEY_STATION3': json[0].Connection,
+						'KEY_TRAIN_LINE': (json[0].orig_line + ' Line').replace('\/','/'),
+						'KEY_DEPART_TIME': json[0].orig_departure_time,
+						'KEY_DELAY': delayMins,
+						'KEY_ARRIVE_TIME': json[0].orig_arrival_time
+					};
+				}
 			}
 			else {
 				// Determine the max number of records
-				if (json.length < requests){
-					requests = json.length;
+				if (json.length < records){
+					records = json.length;
 				}
 				
 				// Create the schedule
 				var text = "";
     			var i = 0;
-   				while (i < requests) {
+   				while (i < records) {
         			text += json[i].orig_departure_time + ' >> ' + 
 						json[i].orig_arrival_time + '\n';
 					
@@ -92,9 +105,10 @@ console.log(URL);
         			i++;
     			}
 				text += '\0';
-console.log(text);
+
 				dictionary = {
-					"KEY_SCHEDULE": text
+					'KEY_TRAIN_LINE': (json[0].orig_line + ' Line').replace('\/','/'),
+					'KEY_SCHEDULE': text
 				};
 			}	
       
@@ -130,21 +144,21 @@ Pebble.addEventListener('appmessage',
 		var dict = e.payload;
 
 		if(dict.KEY_STATION1) {
-			// The AppKeyRequestData key is present, read the value
+			// The KEY_STATION1 key is present, read the value
 			station1 = dict.KEY_STATION1;
 			console.log('station1: ' + station1);
 		}
     
 		if(dict.KEY_STATION2) {
-			// The AppKeyRequestData key is present, read the value
+			// The KEY_STATION2 key is present, read the value
 			station2 = dict.KEY_STATION2;
 			console.log('station2: ' + station2);
 		}
     
-		if(dict.KEY_RECORDS_TO_FETCH) {
-			// The AppKeyRequestData key is present, read the value
-			requests = dict.KEY_RECORDS_TO_FETCH;
-			console.log('number of records to fetch: ' + requests);
+		if(dict.KEY_RECORDS) {
+			// The KEY_RECORDS_TO_FETCH key is present, read the value
+			records = dict.KEY_RECORDS;
+			console.log('records: ' + records);
 		}
 		
 		if (station1 && station2){
