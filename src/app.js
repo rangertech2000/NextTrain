@@ -51,7 +51,8 @@ console.log(URL);
       		if (json.length === 0){
         		// Assemble dictionary using our keys
         		dictionary = {
-					'KEY_DEPART_TIME': 'No trains',
+					'KEY_TRAIN_LINE': 'No trains at this time',
+					'KEY_DEPART_TIME': '00:00',
 				  	'KEY_DELAY': '999',
 				  	'KEY_ARRIVE_TIME': 'No trains'
         		};

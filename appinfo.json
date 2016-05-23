@@ -20,6 +20,12 @@
     "resources": {
         "media": [
             {
+                "file": "images/train_bar_2.png",
+                "name": "IMAGE_TRAIN_BAR",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
                 "file": "images/train_nav_refresh.png",
                 "name": "IMAGE_TRAIN_NAV_REFRESH",
                 "targetPlatforms": null,
@@ -34,12 +40,6 @@
             {
                 "file": "images/train_nav_schedule.png",
                 "name": "IMAGE_TRAIN_NAV_SCHEDULE",
-                "targetPlatforms": null,
-                "type": "bitmap"
-            },
-            {
-                "file": "images/train_bar_1.png",
-                "name": "IMAGE_TRAIN_BAR",
                 "targetPlatforms": null,
                 "type": "bitmap"
             },
