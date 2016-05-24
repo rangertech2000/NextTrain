@@ -1,4 +1,4 @@
-//v2.4.
+//v2.5.
 #include <pebble.h>
 
 typedef enum {
@@ -41,6 +41,7 @@ static TextLayer *title_layer;
 static TextLayer *station1_layer;
 static TextLayer *station2_layer;
 static BitmapLayer *s_septa_logo_layer;
+static TextLayer *s_date_layer;
 
 // Train info window
 static Window *s_trainInfo_window;
@@ -212,7 +213,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 		
 		// Update the train1 info 
 		text_layer_set_text(s_train_station2_layer, station3_buffer);
-		bitmap_layer_set_bitmap(s_train_nav_down_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV_CONNECT));
+		bitmap_layer_set_bitmap(s_train_nav_down_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV_CONNECT_1));
 	
 	}
 	
@@ -255,10 +256,13 @@ static void update_time() {
   
 	// Write the current hours and minutes into a buffer
 	static char s_time_buffer[8];
+	static char s_date_buffer[11];
 	strftime(s_time_buffer, sizeof(s_time_buffer), clock_is_24h_style() ? "%H:%M" : "%I:%M", tick_time);
+	strftime(s_date_buffer, sizeof(s_date_buffer), "%a %b %d", tick_time);
 
 	// Display this time on the main window
 	text_layer_set_text(s_time_layer, s_time_buffer);
+	text_layer_set_text(s_date_layer, s_date_buffer);
 	
 	// Display this time on the train info window
 	if (window_stack_contains_window(s_trainInfo_window)) {
@@ -354,7 +358,7 @@ void train_up_click_handler(ClickRecognizerRef recognizer, void *context) {
 		p_departStation = station1;
 		p_arriveStation = p_connectStation;
 		bitmap_layer_set_bitmap(s_train_nav_up_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV_SCHEDULE));
-		bitmap_layer_set_bitmap(s_train_nav_down_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV_CONNECT));
+		bitmap_layer_set_bitmap(s_train_nav_down_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV_CONNECT_1));
 		
 		fetchData(p_departStation, p_arriveStation, 1);
 	}
@@ -373,7 +377,7 @@ void train_down_click_handler(ClickRecognizerRef recognizer, void *context) {
 		if (p_departStation == station1 || p_departStation == station2) {
 			p_departStation = p_connectStation;
 			p_arriveStation = station2;
-			bitmap_layer_set_bitmap(s_train_nav_up_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV_CONNECT));
+			bitmap_layer_set_bitmap(s_train_nav_up_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV_CONNECT_2));
 			bitmap_layer_set_bitmap(s_train_nav_down_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV_SCHEDULE));
 			
 			fetchData(p_departStation, p_arriveStation, 1);
@@ -437,6 +441,15 @@ static void main_window_load(Window *window) {
 	text_layer_set_text_alignment(station2_layer, GTextAlignmentCenter);
 	text_layer_set_text_color(station2_layer, GColorWhite);
 	text_layer_set_text(station2_layer, station2);
+	
+	// Date layer
+  	s_date_layer = text_layer_create(GRect(4, 144, 100, 20));
+	text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+ 	text_layer_set_background_color(s_date_layer, GColorClear);
+	text_layer_set_text_alignment(s_date_layer, GTextAlignmentLeft);
+	text_layer_set_text_color(s_date_layer, GColorBlack);
+  	//text_layer_set_text(s_date_layer, "Date");
+  	
 
 	// Add it as a child layer to the Window's root layer
 	layer_add_child(window_layer, bitmap_layer_get_layer(s_background_layer));
@@ -445,6 +458,7 @@ static void main_window_load(Window *window) {
 	layer_add_child(window_layer, text_layer_get_layer(station1_layer));
 	layer_add_child(window_layer, text_layer_get_layer(station2_layer));
 	layer_add_child(window_layer, bitmap_layer_get_layer(s_septa_logo_layer));
+	layer_add_child(window_layer, (Layer *)s_date_layer);
 }
 
 static void main_window_unload(Window *window) {
@@ -487,7 +501,7 @@ static void trainInfo_window_load(Window *trainInfo_window) {
 	text_layer_set_background_color(s_train_line_layer, GColorClear);
 	text_layer_set_font(s_train_line_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
 	text_layer_set_text_color(s_train_line_layer, GColorWhite);
-	text_layer_set_text_alignment(s_train_line_layer, GTextAlignmentLeft);
+	text_layer_set_text_alignment(s_train_line_layer, GTextAlignmentCenter);
 	text_layer_set_overflow_mode(s_train_line_layer, GTextOverflowModeWordWrap);
 	//text_layer_set_text(s_train_line_layer, station1);
 	layer_add_child(window_get_root_layer(trainInfo_window), text_layer_get_layer(s_train_line_layer));
@@ -591,7 +605,7 @@ static void trainInfo_window_load(Window *trainInfo_window) {
 	
 	// Create train navigation connect layer
 	s_train_nav_down_layer = bitmap_layer_create(
-	  GRect(PBL_IF_ROUND_ELSE(123, 128), PBL_IF_ROUND_ELSE(109, 114), 18, 42));
+	  GRect(PBL_IF_ROUND_ELSE(123, 126), PBL_IF_ROUND_ELSE(109, 114), 18, 42));
 	//bitmap_layer_set_bitmap(s_train_nav_down_layer, gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_NAV_CONNECT));
 	//bitmap_layer_set_background_color(s_train_nav_down_layer, GColorClear);
 	bitmap_layer_set_compositing_mode(s_train_nav_down_layer, GCompOpSet);

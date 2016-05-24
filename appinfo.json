@@ -20,6 +20,25 @@
     "resources": {
         "media": [
             {
+                "file": "images/septa_logo_28.png",
+                "menuIcon": true,
+                "name": "septa_logo_28",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
+                "file": "images/train_nav_connect_2.png ",
+                "name": "IMAGE_TRAIN_NAV_CONNECT_2",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
+                "file": "images/train_nav_connect_1.png ",
+                "name": "IMAGE_TRAIN_NAV_CONNECT_1",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
                 "file": "images/train_bar_2.png",
                 "name": "IMAGE_TRAIN_BAR",
                 "targetPlatforms": null,
@@ -28,12 +47,6 @@
             {
                 "file": "images/train_nav_refresh.png",
                 "name": "IMAGE_TRAIN_NAV_REFRESH",
-                "targetPlatforms": null,
-                "type": "bitmap"
-            },
-            {
-                "file": "images/train_nav_connect.png",
-                "name": "IMAGE_TRAIN_NAV_CONNECT",
                 "targetPlatforms": null,
                 "type": "bitmap"
             },
